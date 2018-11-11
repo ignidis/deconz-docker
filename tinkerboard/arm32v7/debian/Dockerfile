@@ -50,16 +50,16 @@ RUN	WIRINGPI_VERSION="2.31-TB"; \
 #
 # Create service group and service account
 #
-	groupadd -g $SERVICE_GROUP_UID $SERVICE_GROUP; \
-	useradd -u $SERVICE_USER_UID -g $SERVICE_GROUP --groups $ADD_GROUPS --shell /bin/bash --create-home $SERVICE_USER; \
+	groupadd -g "$SERVICE_GROUP_UID" "$SERVICE_GROUP"; \
+	useradd -u "$SERVICE_USER_UID" -g "$SERVICE_GROUP" --groups "$ADD_GROUPS" --shell /bin/bash --create-home "$SERVICE_USER"; \
 #
 # Allow service account to sudo without pasword
 #
-	echo 'deconz ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/090_deconz-nopasswd; \
+	echo "${SERVICE_USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/090_${SERVICE_USER}-nopasswd; \
 #
 # CWD
 #
-	cd /home/$SERVICE_USER/; \
+	cd /home/"$SERVICE_USER"/; \
 #
 # Install WIRINPI as long as this is a required dependency
 #
@@ -80,7 +80,7 @@ RUN	WIRINGPI_VERSION="2.31-TB"; \
 	chown root:root /usr/bin/deCONZ*; \
 	setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/deCONZ; \
 	mkdir /opt/deconz; \
-	chown -R $SERVICE_USER:$SERVICE_GROUP /opt/deconz; \
+	chown -R "$SERVICE_USER":"$SERVICE_GROUP" /opt/deconz; \
 #
 #
 # Clean the apt cache and remove packages needed only for the installation
