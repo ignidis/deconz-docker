@@ -7,8 +7,8 @@ docker run -d \
 	--restart="unless-stopped" \
 	--user="9001" \
 	--volume="/etc/localtime:/etc/localtime:ro" \
-	--volume="/var/lib/deconz/config:/home/deconz/.local/share/dresden-elektronik/deCONZ" \
-	--volume="/var/lib/deconz/otau:/home/deconz/otau" \
+	--volume="/var/lib/services/deconz/config:/home/deconz/.local/share/dresden-elektronik/deCONZ" \
+	--volume="/var/lib/services/deconz/otau:/home/deconz/otau" \
 	--device="/dev/gpiomem" \
 	--device="/dev/ttyS1" \
 	-e DECONZ_DEVICE="/dev/ttyS1" \

@@ -1,0 +1,8 @@
+VERSION="2.05.46"
+
+DEVICE="/dev/ttyS1"
+
+UID="9001"
+HTTP_PORT="8080"
+WS_PORT="8443"
+

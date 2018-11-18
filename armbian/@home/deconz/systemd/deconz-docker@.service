@@ -1,0 +1,36 @@
+[Unit]
+Description=deCONZ: ZigBee gateway -- REST API
+After=docker.service
+
+[Service]
+RemainAfterExit=true
+EnvironmentFile=/home//%I/deconz/.service-config
+ExecStart=/usr/bin/docker run -d \
+		-t \
+		--init \
+		--name="deconz" \
+		--restart="unless-stopped" \
+		--user="${UID}" \
+		--volume="/etc/localtime:/etc/localtime:ro" \
+		--volume="/var/lib/services/deconz/config:/home/deconz/.local/share/dresden-elektronik/deCONZ" \
+		--volume="/var/lib/services/deconz/otau:/home/deconz/otau" \
+		--device="/dev/gpiomem" \
+		--device="/dev/ttyS1" \
+		-e DECONZ_DEVICE="/dev/ttyS1" \
+		--network="bridge" \
+		-p ${HTTP_PORT}:8080 \
+		-p ${WS_PORT}:8443 \
+		-e DECONZ_WEB_PORT="8080" \
+		-e DECONZ_WS_PORT="8443" \
+		-e DEBUG_INFO="0" \
+		-e DEBUG_APS="0" \
+		-e DEBUG_ZCL="1" \
+		-e DEBUG_ZDP="0" \
+		-e DEBUG_OTAU="0" \
+		-e DECONZ_VERSION="${VERSION}" \
+		deconz:"${VERSION}"-arm32v7-debian
+
+ExecStop=/usr/bin/docker rm --force deconz
+
+[Install]
+WantedBy=multi-user.target
