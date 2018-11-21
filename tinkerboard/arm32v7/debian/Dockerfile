@@ -102,10 +102,10 @@ EXPOSE ${DECONZ_WEB_PORT} ${DECONZ_WS_PORT}
 #
 # Copy the start command
 #
-USER	${DECONZ_SVC_UID}
 COPY	deCONZ-run.sh /opt/deconz/deCONZ-run.sh
-RUN	sudo chmod +x /opt/deconz/deCONZ-run.sh
+RUN	chown "$SERVICE_USER":"$SERVICE_GROUP" /opt/deconz/deCONZ-run.sh && chmod +x /opt/deconz/deCONZ-run.sh
 
+USER	${DECONZ_SVC_UID}
 WORKDIR "/opt/deconz/"
 ENTRYPOINT [ "/opt/deconz/deCONZ-run.sh" ]
 #

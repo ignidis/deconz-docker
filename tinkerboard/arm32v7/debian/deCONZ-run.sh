@@ -2,8 +2,8 @@
 #
 # Echo DEBUG Info to the console
 #
-USER="$(whoami)"
-USER_ID="$(id -u ${USER})"
+USER="$(id -un)"
+USER_ID="$(id -u)"
 echo "Starting deCONZ version: $DECONZ_VERSION"
 echo "Service Account: $USER $USER_ID"
 echo "Web UI port: $DECONZ_WEB_PORT"
@@ -18,10 +18,12 @@ if [[ "$DECONZ_DEVICE" == /dev/ttyS* ]]; then
 fi
 #
 # Set Permissions for home and peristent storage volumes
+# This is now acomplished in the host during setup, to enforce user namespaces security
 #
-sudo chown -R "$USER":"$USER" /home/"$USER"/;
-sudo chown -R "$USER":root /home/"$USER"/.local;
-sudo chown -R "$USER":root /home/"$USER"/otau;
+# sudo chown -R "$USER":"$USER" /home/"$USER"/;
+# sudo chown -R "$USER":root /home/"$USER"/.local;
+# sudo chown -R "$USER":root /home/"$USER"/otau;
+#
 cd /home/"$USER";
 #
 # Start deCONZ

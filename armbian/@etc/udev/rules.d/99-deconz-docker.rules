@@ -1,0 +1,5 @@
+# raspbee access permissions for docker container running in a namespaced environment
+KERNEL=="ttyS1", RUN+="/bin/chown 90019001:90019001 /dev/$name", MODE="0660"
+
+# gpiomem access is required for the firmware flasher
+SUBSYSTEM=="rk3288-gpiomem", RUN+="/bin/chown 90019001:gpio /dev/$name", MODE="0660"
