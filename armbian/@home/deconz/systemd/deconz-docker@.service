@@ -15,18 +15,18 @@ ExecStart=/usr/bin/docker run -d \
 		--volume="/var/lib/services/deconz/config:/home/deconz/.local/share/dresden-elektronik/deCONZ" \
 		--volume="/var/lib/services/deconz/otau:/home/deconz/otau" \
 		--device="/dev/gpiomem" \
-		--device="/dev/ttyS1" \
-		-e DECONZ_DEVICE="/dev/ttyS1" \
+		--device="${DEVICE_HOST}:${DEVICE_CONTAINER}" \
+		-e DECONZ_DEVICE="${DEVICE_CONTAINER}" \
 		--network="bridge" \
 		-p ${HTTP_PORT}:8080 \
 		-p ${WS_PORT}:8443 \
 		-e DECONZ_WEB_PORT="8080" \
 		-e DECONZ_WS_PORT="8443" \
-		-e DEBUG_INFO="0" \
-		-e DEBUG_APS="0" \
-		-e DEBUG_ZCL="1" \
-		-e DEBUG_ZDP="0" \
-		-e DEBUG_OTAU="0" \
+		-e DEBUG_INFO="${DEBUG_INFO}" \
+		-e DEBUG_APS="${DEBUG_APS}" \
+		-e DEBUG_ZCL="${DEBUG_ZCL}" \
+		-e DEBUG_ZDP="${DEBUG_ZDP}" \
+		-e DEBUG_OTAU="${DEBUG_OTAU}" \
 		-e DECONZ_VERSION="${VERSION}" \
 		deconz:"${VERSION}"-arm32v7-debian
 

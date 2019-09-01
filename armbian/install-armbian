@@ -1,0 +1,24 @@
+1. Make sure the Maskrom jumper is set to Parking (parallel to HDMI plug)
+2. Connect the Tinkerboard S via USB only - use the micro USB "Power Plug"
+3. Flash the eMMC Drive with the current version of Armbian Server for the TB, as if it was an SD Card (with etcher or disk imager)
+4. Remove the TInkerboard from USB and power with the mains adapter
+5. Login into Armbian and complete the initial configuration
+6. screen && sudo armbian-config
+	6.1 Set the Timezone to your local timezone, this is important for the smart-home components
+	6.2 Set your keyboard
+	6.3 Set your hostname
+	6.4 Do any additional changes to the Personal Settings
+	6.5 Reboot and log as the admin user defined during initial installation
+	6.6 Disable IPv6 if not needed
+	6.7 Remove Bluetooth Support
+	6.8 Install Docker and set options in /etc/default/docker (DOCKER_OPTS="--config-file=/etc/docker/daemon.json")
+	6.9 Add console=ttyS3,115200n8 to /boot/armbianEnv.txt and reboot
+7. install and configure remote control software
+	7.1 Install Cockpit (cockpit, cockpit-dashboard, cockpit-docker, cockpit-networkmanager, cockpit-storaged, cockpit-packagekit, cockpit-pcp)
+	7.2 Install tuned
+	7.3 Configure SSH
+	7.4 Install MC
+	7.5 Create and set all required locales to UTF , also check /etc/environment
+	7.6 Configure shell profile, bashrc
+8. Secure Docker and create the service accounts
+

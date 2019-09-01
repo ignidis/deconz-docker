@@ -10,8 +10,8 @@ ARG	DECONZ_SVC_UID
 #
 # Runtime environment variables
 #
-ENV	DECONZ_WEB_PORT=8080 \
-	DECONZ_WS_PORT=8443 \
+ENV	DECONZ_WEB_PORT=80 \
+	DECONZ_WS_PORT=443 \
 	DEBUG_INFO=1 \
 	DEBUG_APS=0 \
 	DEBUG_ZCL=0 \
@@ -78,10 +78,14 @@ RUN	WIRINGPI_VERSION="2.31-TB"; \
 	apt-get install -y ./deconz-${DECONZ_VERSION}-qt5.deb; \
 	rm -f ./deconz-${DECONZ_VERSION}-qt5.deb; \
 	chown root:root /usr/bin/deCONZ*; \
-	setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/deCONZ; \
+#
+# Capabilities needed CAP_NET_BIND_SERVICE CAP_KILL {CAP_SYS_BOOT CAP_SYS_TIME <- Not in Docker}
+#
+	setcap CAP_NET_BIND_SERVICE,CAP_KILL+eip /usr/bin/deCONZ; \
 	mkdir /opt/deconz; \
 	chown -R "$SERVICE_USER":"$SERVICE_GROUP" /opt/deconz; \
 #
+	mkdir -p "/run/udev/data/"; \
 #
 # Clean the apt cache and remove packages needed only for the installation
 #
@@ -98,6 +102,11 @@ VOLUME	/home/${DECONZ_SVC_NAME}/.local/share/dresden-elektronik/deCONZ /home/${D
 # Publish the web app and sockets ports
 #
 EXPOSE ${DECONZ_WEB_PORT} ${DECONZ_WS_PORT}
+
+#
+# Copy the Conbee udev parameters
+#
+COPY	run/udev/data/c188:0 /run/udev/data/c188:0
 
 #
 # Copy the start command

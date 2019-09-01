@@ -1,0 +1,6 @@
+{
+
+  "userns-remap": "service:services",
+  "insecure-registries" : ["docker-registry-default.os.cybearth.net"]
+
+}
