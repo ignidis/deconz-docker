@@ -1,14 +1,35 @@
-FROM arm32v7/debian:stretch-slim
+FROM builder:deconz-arm32v7-debian
 
 #
 # Build Time Arguments
 #
+ARG	NAME
 ARG	DECONZ_VERSION
 ARG	DECONZ_SVC_NAME
 ARG	DECONZ_SVC_UID
 
 #
-# Runtime environment variables
+# Do some bookeeping for the repository and openshift
+#
+#
+# It is deprecated but guess what...There are a lot of tools that still use it
+#
+MAINTAINER ignidis(at)cybearth(dot)net (https://github.com/ignidis/deconz-docker)
+
+#
+# And this is for those new tools
+#
+LABEL summary="Smarthome Platform based on dresden elektronics ${NAME}-${DECONZ_VERSION} Zigbee platform plugin (https://github.com/dresden-elektronik/deconz-rest-plugin/)" \
+      description="This image is designed to run on the ASUS Tinkerboard using dresden elektronics Zigbee Gateway adapters Raspbee or Conbee" \
+      io.openshift.expose-services="80:http" \
+      io.openshift.expose-services="443:https" \
+      name="${NAME}" \
+      version="${DECONZ_VERSION}-amd64-centos" \
+      maintainer="ignidis(at)cybearth(dot)net" \
+      help="For more information visit https://github.com/ignidis/deconz-docker"
+
+#
+# Setup runtime variables
 #
 ENV	DECONZ_WEB_PORT=80 \
 	DECONZ_WS_PORT=443 \
@@ -20,80 +41,6 @@ ENV	DECONZ_WEB_PORT=80 \
 	DECONZ_DEVICE="/dev/null"
 
 #
-# Update the operating system and install required packges
-#
-RUN	WIRINGPI_VERSION="2.31-TB"; \
-	export DEBIAN_FRONTEND="noninteractive"; \
-	export TERM="xterm"; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends --autoremove apt-utils wget ca-certificates; \
-	apt-get install -y --no-install-recommends --autoremove \
-	sudo \
-	libcap2-bin \
-	libqt5core5a \
-	libqt5gui5 \
-	libqt5network5 \
-	libqt5serialport5 \
-	libqt5sql5 \
-	libqt5websockets5 \
-	libqt5widgets5 \
-	sqlite3 \
-	; \
-#
-# Define Service Account variables
-#
-	SERVICE_USER=${DECONZ_SVC_NAME}; \
-	SERVICE_USER_UID=${DECONZ_SVC_UID}; \
-	SERVICE_GROUP=${DECONZ_SVC_NAME}; \
-	SERVICE_GROUP_UID=${DECONZ_SVC_UID}; \
-	ADD_GROUPS="sudo,dialout"; \
-#
-# Create service group and service account
-#
-	groupadd -g "$SERVICE_GROUP_UID" "$SERVICE_GROUP"; \
-	useradd -u "$SERVICE_USER_UID" -g "$SERVICE_GROUP" --groups "$ADD_GROUPS" --shell /bin/bash --create-home "$SERVICE_USER"; \
-#
-# Allow service account to sudo without pasword
-#
-	echo "${SERVICE_USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/090_${SERVICE_USER}-nopasswd; \
-#
-# CWD
-#
-	cd /home/"$SERVICE_USER"/; \
-#
-# Install WIRINPI as long as this is a required dependency
-#
-#	wget https://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_${WIRINGPI_VERSION}_armhf.deb; \
-#
-# For the Tinker Board we use the gpio_lib_c packaged as wiringpi package in order to satisfy dependencies 
-#
-#
-	wget https://github.com/ignidis/deconz-docker-helper/raw/master/wiringpi_${WIRINGPI_VERSION}_armhf.deb; \
-	dpkg -i ./wiringpi_${WIRINGPI_VERSION}_armhf.deb; \
-	rm -f ./wiringpi_${WIRINGPI_VERSION}_armhf.deb;\
-#
-# Install deCONZ and fix the ownership
-#
-	wget https://www.dresden-elektronik.de/rpi/deconz/beta/deconz-${DECONZ_VERSION}-qt5.deb; \
-	apt-get install -y ./deconz-${DECONZ_VERSION}-qt5.deb; \
-	rm -f ./deconz-${DECONZ_VERSION}-qt5.deb; \
-	chown root:root /usr/bin/deCONZ*; \
-#
-# Capabilities needed CAP_NET_BIND_SERVICE CAP_KILL {CAP_SYS_BOOT CAP_SYS_TIME <- Not in Docker}
-#
-	setcap CAP_NET_BIND_SERVICE,CAP_KILL+eip /usr/bin/deCONZ; \
-	mkdir /opt/deconz; \
-	chown -R "$SERVICE_USER":"$SERVICE_GROUP" /opt/deconz; \
-#
-	mkdir -p "/run/udev/data/"; \
-#
-# Clean the apt cache and remove packages needed only for the installation
-#
-	apt-get -y --purge remove ca-certificates wget apt-utils; \
-	apt -y autoremove; \
-	apt-get clean -y; \
-	rm -rf /var/lib/apt/lists/*;
-#
 # Create the Configuration and the OTAU directory
 #
 VOLUME	/home/${DECONZ_SVC_NAME}/.local/share/dresden-elektronik/deCONZ /home/${DECONZ_SVC_NAME}/otau
@@ -103,20 +50,10 @@ VOLUME	/home/${DECONZ_SVC_NAME}/.local/share/dresden-elektronik/deCONZ /home/${D
 #
 EXPOSE ${DECONZ_WEB_PORT} ${DECONZ_WS_PORT}
 
-#
-# Copy the Conbee udev parameters
-#
-COPY	run/udev/data/c188:0 /run/udev/data/c188:0
-
-#
-# Copy the start command
-#
-COPY	deCONZ-run.sh /opt/deconz/deCONZ-run.sh
-RUN	chown "$SERVICE_USER":"$SERVICE_GROUP" /opt/deconz/deCONZ-run.sh && chmod +x /opt/deconz/deCONZ-run.sh
-
 USER	${DECONZ_SVC_UID}
 WORKDIR "/opt/deconz/"
 ENTRYPOINT [ "/opt/deconz/deCONZ-run.sh" ]
+
 #
 # For testing and debugging comment out the above ENTRYPOINT and uncomment the following
 #
